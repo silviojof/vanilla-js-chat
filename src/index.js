@@ -1,4 +1,4 @@
-function showMessage(name, time, message) {
+export function showMessage(name, time, message) {
     var newLi = document.createElement("li");
     const element = `
         <div class="message-header">
@@ -11,20 +11,20 @@ function showMessage(name, time, message) {
     return newLi;
 }
 
-function loadChat(chat) {
+export function loadChat(chat) {
     const element = `
-        <h1 class="title">${chat}</h1>
-        <div class="">
-        <ul class="message-list" id="message-list"></ul>
-        <div class="ball-loader-container">
-            <div class="ball-loader" id="typing">
-            <div class="ball-loader-ball ball1"></div>
-            <div class="ball-loader-ball ball2"></div>
-            <div class="ball-loader-ball ball3"></div>
+        <h1 class="title">${chat || 'My First Chat'}</h1>
+        <div>
+            <ul class="message-list" id="message-list"></ul>
+            <div class="ball-loader-container">
+                <div class="ball-loader" id="typing">
+                <div class="ball-loader-ball ball1"></div>
+                <div class="ball-loader-ball ball2"></div>
+                <div class="ball-loader-ball ball3"></div>
             </div>
         </div>
         <div class="message-input">
-            <input type="text" class="input" id="input-box" placeholder="Type your message here!" />
+            <input type="text" data-testid="input" class="input" id="input-box" placeholder="Type your message here!" />
             <button class="button" type="button" id="send-button">Send</button>
         </div>
         </div>
@@ -32,13 +32,14 @@ function loadChat(chat) {
     return element;
 }
 
-class Chat {
-    constructor(title, name) {
+export class Chat {
+    constructor(title, name, target) {
         this.title = title;
         this.name = name;
         this.newMessage = '';
         this.typing = false;
         this.interval;
+        this.target = target;
     }
     init() {
         this.loadStructure();
@@ -54,7 +55,7 @@ class Chat {
         this.typingField = document.getElementById(`typing`);
     }
     loadStructure() {
-        document.getElementById('chat-container').innerHTML = loadChat(this.title, this.id);
+        this.target.innerHTML = loadChat(this.title, this.id);
     }
     bindEvents() {
         this.sendButton.addEventListener("click", this.addNewMessage.bind(this));
@@ -105,6 +106,7 @@ class Chat {
         // After estabilishing connection to server, check if there's 
         if(!this.isChatStreamClean()) {
             this.messageList.innerHTML = `<li class="empty-message" id="empty-message">This chatroom has no messages so far.</li>`;
+            this.input.focus();
             return;
         }
         const emptyMessage = document.getElementById(`empty-message`);
@@ -119,10 +121,12 @@ class Chat {
     }    
 }
 
-(function(){
-    const name = prompt('What is your name?');
-    const chatName = prompt('What is the chatroom name?');
-    const chat = new Chat(chatName, name);
-    chat.init()
-})();
-  
+window.onload = function() {
+    (function(){
+        const name = prompt('What is your name?');
+        const chatName = prompt('What is the chatroom name?');
+        const target = document.getElementById('chat-container');
+        const chat = new Chat(chatName, name, target);
+        chat.init()
+     })();
+};
